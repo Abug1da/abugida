@@ -10,7 +10,7 @@ const audioMap = {
     "https://res.cloudinary.com/dc6jadrue/video/upload/v1769477461/ba_ipolmu.mp3",
   "be.mp3":
     "https://res.cloudinary.com/dc6jadrue/video/upload/v1769477461/be_m30leg.mp3",
-  "bee.mp3":
+  "bi.mp3":
     "https://res.cloudinary.com/dc6jadrue/video/upload/v1769477461/bi_ikhfhu.mp3",
   "bie.mp3":
     "https://res.cloudinary.com/dc6jadrue/video/upload/v1769477461/bie_ye6zr1.mp3",
@@ -25,7 +25,7 @@ const audioMap = {
   "Ce.mp3":
     "https://res.cloudinary.com/dc6jadrue/video/upload/v1769477464/ch_e_fcxcdj.mp3",
   "ch.mp3":
-    "https://res.cloudinary.com/dc6jadrue/video/upload/v1769477464/ch_a_veatm6.mp3",
+    "https://res.cloudinary.com/dc6jadrue/video/upload/v1769477463/ch_ktgsu5.mp3",
   "cha.mp3":
     "https://res.cloudinary.com/dc6jadrue/video/upload/v1769477468/cha_up4o5s.mp3",
   "che.mp3":

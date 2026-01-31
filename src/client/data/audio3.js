@@ -10,7 +10,7 @@ const audioMap = {
     "https://res.cloudinary.com/dc6jadrue/video/upload/v1768515680/ba_k7wzcx.mp3",
   "be.mp3":
     "https://res.cloudinary.com/dc6jadrue/video/upload/v1768515680/be_qphwf0.mp3",
-  "bee.mp3":
+  "bi.mp3":
     "https://res.cloudinary.com/dc6jadrue/video/upload/v1768515681/bi_a8f7xb.mp3",
   "bie.mp3":
     "https://res.cloudinary.com/dc6jadrue/video/upload/v1768515681/bie_xcrs86.mp3",

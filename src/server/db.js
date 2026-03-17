@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+// Only the backend connects to the database; Cloudflare (tunnel) does not. See documentation/BACKEND_DATABASE_SETUP.md.
+
 // Get connection options based on the connection string
 const getConnectionOptions = (mongoURI, useTLS = null) => {
   const baseOptions = {

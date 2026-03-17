@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { auth, db } from "../firebaseConfig";
 import { useAuth } from "../context/AuthContext";
 import "../styles/login/login.css";
 
@@ -16,6 +17,14 @@ export default function Login({ onFormSwitch }) {
     setError("");
     setLoading(true);
 
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     try {
       const result = await login(usernameOrEmail, pass);
       
@@ -57,6 +66,9 @@ export default function Login({ onFormSwitch }) {
           onChange={(e) => setPass(e.target.value)}
           required
         />
+        <button type="button" onClick={handleGoogleLogin}>
+          Login with Google
+        </button>
         <button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Log In"}
         </button>

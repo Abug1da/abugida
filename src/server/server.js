@@ -150,13 +150,31 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Startup env validation (production): fail fast if critical env is missing or weak
+const isProduction = process.env.NODE_ENV === 'production';
+const mongoUri = process.env.MONGO_URL || process.env.MONGODB_URI;
+const jwtSecret = process.env.JWT_SECRET;
+const weakJwtSecret = !jwtSecret || jwtSecret === 'your-secret-key-change-this';
+
+if (isProduction) {
+  if (!mongoUri) {
+    console.error('FATAL: In production, MONGO_URL or MONGODB_URI must be set. See documentation/BACKEND_DATABASE_SETUP.md');
+    process.exit(1);
+  }
+  if (weakJwtSecret) {
+    console.error('FATAL: In production, JWT_SECRET must be set to a strong random value. See documentation/BACKEND_DATABASE_SETUP.md');
+    process.exit(1);
+  }
+} else if (!mongoUri || weakJwtSecret) {
+  console.warn('WARN: MONGO_URL/MONGODB_URI or JWT_SECRET not set or using default. Set them for production. See .env.example and documentation/BACKEND_DATABASE_SETUP.md');
+}
+
 // Start server with error handling
 let server;
 try {
   server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    const mongoUri = process.env.MONGO_URL || process.env.MONGODB_URI;
     console.log(`MongoDB URI: ${mongoUri ? 'Set' : 'Not set'} (${process.env.MONGO_URL ? 'Railway integration' : 'manual'})`);
     console.log(`Server started successfully at http://0.0.0.0:${PORT}`);
     console.log(`Cloudflare Tunnel should route api.theabugida.org to this server`);

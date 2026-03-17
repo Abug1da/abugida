@@ -2,6 +2,8 @@
 
 This guide will help you get started with the backend server for the Abugida application.
 
+**Architecture and env:** For the correct flow (Client → Cloudflare tunnel → backend → database), required env vars, and DB IP allowlist, see [BACKEND_DATABASE_SETUP.md](../../documentation/BACKEND_DATABASE_SETUP.md).
+
 ## Prerequisites
 
 - Node.js (v14 or higher)

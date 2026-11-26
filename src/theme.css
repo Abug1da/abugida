@@ -1,0 +1,185 @@
+/* ============================================================
+   ABUGIDA — DESIGN TOKENS (Tailwind v4 @theme)
+
+   Coffee-ceremony palette, not the flag. Roasted bean, clay
+   jebena, ochre, rust, unbleached cotton.
+
+   Netela rule: the field stays cream; saturated colour (indigo,
+   highland green) lives only in woven bands / accents and
+   functional status — never as large surfaces.
+
+   Fonts:
+   Newsreader (display serif) · Hanken Grotesk (body) ·
+   Noto Serif/Sans Ethiopic (Fidel) · Space Mono (keys)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Noto+Serif+Ethiopic:wght@400;500;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+@theme {
+  /* --- Warm neutral: unbleached cotton → fired clay ---------- */
+  --color-clay-50:  #FBF6EC;
+  --color-clay-100: #F7EFE1;  /* cream — the field */
+  --color-clay-200: #EBDFCB;
+  --color-clay-300: #D8C6A9;
+  --color-clay-400: #B9A184;
+  --color-clay-500: #8C7A67;  /* ash */
+  --color-clay-600: #6E5C4A;
+  --color-clay-700: #55432F;
+  --color-clay-800: #4A2E1E;  /* bean — deep roast */
+  --color-clay-900: #241A14;  /* jebena — the fired pot */
+  --color-clay-950: #150F0B;
+
+  /* --- Rust: roasted bean, primary brand --------------------- */
+  --color-vermilion-50:  #FAEBE5;
+  --color-vermilion-100: #F3D3C7;
+  --color-vermilion-200: #E5A891;
+  --color-vermilion-300: #D47C5F;
+  --color-vermilion-400: #BE5839;
+  --color-vermilion-500: #A8412A;  /* base */
+  --color-vermilion-600: #8E3421;
+  --color-vermilion-700: #71281A;
+  --color-vermilion-800: #551D13;
+  --color-vermilion-900: #3A140D;
+
+  /* --- Ochre: coffee cherry, turmeric, straw ----------------- */
+  --color-saffron-50:  #FBF2DF;
+  --color-saffron-100: #F6E4BC;
+  --color-saffron-200: #EDCB84;
+  --color-saffron-300: #DFAE52;
+  --color-saffron-400: #C98A2B;  /* base */
+  --color-saffron-500: #B07724;
+  --color-saffron-600: #8E5F1C;
+  --color-saffron-700: #6B4715;
+  --color-saffron-800: #4A310E;
+
+  /* --- Thread colours: bands and status only ----------------- */
+  --color-indigo-50:  #E8EEF5;
+  --color-indigo-100: #C8D8E8;
+  --color-indigo-200: #8FAAC8;
+  --color-indigo-300: #557FAA;
+  --color-indigo-400: #2C5C8D;
+  --color-indigo-500: #1D4A7A;  /* base */
+  --color-indigo-600: #173C64;
+  --color-indigo-700: #122E4D;
+  --color-indigo-800: #0C2036;
+
+  --color-highland-50:  #E6F0EA;
+  --color-highland-100: #C5DDD0;
+  --color-highland-200: #8FBCA3;
+  --color-highland-300: #559A76;
+  --color-highland-400: #1F6F52;  /* base */
+  --color-highland-500: #1A5C44;
+  --color-highland-600: #144734;
+  --color-highland-700: #0E3325;
+
+  /* --- Semantic aliases (use these in product UI) ------------ */
+  --color-surface-page:    var(--color-clay-100);
+  --color-surface-raised:  #FFFDF8;
+  --color-surface-sunken:  var(--color-clay-200);
+  --color-surface-inverse: var(--color-clay-900);
+
+  --color-ink-strong: var(--color-clay-900);
+  --color-ink:        var(--color-clay-800);
+  --color-ink-muted:  var(--color-clay-500);
+  --color-ink-faint:  var(--color-clay-400);
+  --color-ink-on-dark: var(--color-clay-100);
+
+  --color-brand:       var(--color-vermilion-500);
+  --color-brand-hover: var(--color-vermilion-600);
+  --color-brand-press: var(--color-vermilion-700);
+  --color-brand-soft:  var(--color-vermilion-50);
+
+  --color-success: var(--color-highland-400);
+  --color-warning: var(--color-saffron-400);
+  --color-danger:  var(--color-vermilion-600);
+  --color-info:    var(--color-indigo-500);
+
+  /* --- Fonts ------------------------------------------------- */
+  --font-display: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --font-body:    'Hanken Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-fidel:   'Noto Serif Ethiopic', 'Noto Sans Ethiopic', serif;
+  --font-fidel-sans: 'Noto Sans Ethiopic', sans-serif;
+  --font-mono:    'Space Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* --- Type scale (~1.25 major third, tuned) ----------------- */
+  --text-2xs: 0.6875rem;
+  --text-xs:  0.75rem;
+  --text-sm:  0.875rem;
+  --text-base: 1rem;
+  --text-lg:  1.125rem;
+  --text-xl:  1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: 3rem;
+  --text-5xl: 4rem;
+  --text-6xl: 5.25rem;   /* hero display */
+
+  /* --- Tracking ---------------------------------------------- */
+  --tracking-tight: -0.02em;
+  --tracking-wide:  0.04em;
+  --tracking-caps:  0.12em;   /* eyebrows / overline labels */
+
+  /* --- Radii: manuscripts are soft --------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;   /* default control radius */
+  --radius-lg: 16px;   /* cards */
+  --radius-xl: 24px;   /* feature panels */
+
+  /* --- Shadows: warm clay-tinted, never pure black ----------- */
+  --shadow-xs: 0 1px 2px rgba(58, 48, 39, 0.06);
+  --shadow-sm: 0 1px 2px rgba(58, 48, 39, 0.06),
+               0 2px 6px rgba(58, 48, 39, 0.07);
+  --shadow-md: 0 2px 4px rgba(58, 48, 39, 0.06),
+               0 8px 20px rgba(58, 48, 39, 0.10);
+  --shadow-lg: 0 6px 12px rgba(36, 28, 21, 0.08),
+               0 18px 40px rgba(36, 28, 21, 0.14);
+  --shadow-xl: 0 12px 24px rgba(36, 28, 21, 0.12),
+               0 30px 70px rgba(36, 28, 21, 0.20);
+
+  /* --- Motion ------------------------------------------------ */
+  --ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Non-utility tokens */
+:root {
+  --focus-ring: 0 0 0 3px rgba(229, 174, 64, 0.45);
+  --container-prose: 42rem;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-body);
+    background: var(--color-surface-page);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink-strong);
+    line-height: 1.08;
+    font-weight: 500;
+  }
+
+  ::selection {
+    background: var(--color-saffron-200);
+    color: var(--color-clay-900);
+  }
+}
+
+@utility eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-brand);
+}
+
+@utility fidel {
+  font-family: var(--font-fidel);
+  line-height: 1.7;
+}

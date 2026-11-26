@@ -1,3 +1,7 @@
 export default function Profile() {
-  return <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-10">
+      <h1 className="text-3xl">Profile</h1>
+    </div>
+  )
 }

@@ -27,7 +27,7 @@ export default function Login() {
   }
 
   return (
-    <div className="mx-auto max-w-sm">
+    <div className="mx-auto max-w-sm px-4 py-10">
       <h1 className="mb-6 text-3xl font-bold text-gray-900">Log in</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1 text-sm">

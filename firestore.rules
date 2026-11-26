@@ -2,8 +2,45 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Course content: public read, written only by scripts/seed.ts (Admin SDK bypasses rules).
+    match /characters/{characterId} {
+      allow read: if true;
+    }
+    match /lessons/{lessonId} {
+      allow read: if true;
+    }
+
+    // Progress is self-reported: a user can forge their own scores. Fine for a free
+    // single-player v1; move scoring server-side before anything (certificates, rankings) trusts it.
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
+
+      // One doc per character ID, shape written by src/lessons/engine.ts finishSession().
+      match /progress/{characterId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['attempts', 'correct', 'streak', 'lastSeen'])
+          && request.resource.data.attempts is int
+          && request.resource.data.correct is int
+          && request.resource.data.streak is int
+          && request.resource.data.lastSeen is int;
+      }
+
+      // One doc per lesson, shape written by finishSession() result.
+      match /lessonResults/{lessonId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['bestScore', 'attempts', 'lastPlayed'])
+          && request.resource.data.bestScore is number
+          && request.resource.data.bestScore >= 0
+          && request.resource.data.bestScore <= 1
+          && request.resource.data.attempts is int
+          && request.resource.data.lastPlayed is int;
+      }
     }
   }
 }

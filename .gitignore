@@ -28,3 +28,10 @@ dist-ssr
 
 # Firebase CLI local cache
 .firebase/
+
+# Local progress from npm run try-lesson
+.abugida-progress.json
+
+# Firebase service-account keys (used by npm run seed)
+*service-account*.json
+firestore-debug.log

@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1795739858880,
+      "tag": "0000_smart_phalanx",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1795740267337,
+      "tag": "0001_rate_limit",
+      "breakpoints": true
+    }
+  ]
+}

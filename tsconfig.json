@@ -25,10 +25,11 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
+    ".railway/**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", ".claude", ".open-next", ".wrangler"]
+  "exclude": ["node_modules", ".claude"]
 }

@@ -1,0 +1,14 @@
+# Local Postgres for development: `docker compose up -d`. Production uses Railway's Postgres.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: abugida
+      POSTGRES_PASSWORD: abugida
+      POSTGRES_DB: abugida
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+volumes:
+  postgres-data:

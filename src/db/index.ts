@@ -1,13 +1,19 @@
 import "server-only";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { drizzle } from "drizzle-orm/d1";
-import { cache } from "react";
+import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
 
-// D1 is only reachable through the request's Cloudflare env, so build the client per request.
-export const getDb = cache(async () => {
-  const { env } = await getCloudflareContext({ async: true });
-  return drizzle(env.DB, { schema });
-});
+export type Db = PostgresJsDatabase<typeof schema>;
 
-export type Db = Awaited<ReturnType<typeof getDb>>;
+// Created on first use so `next build` doesn't need DATABASE_URL. Kept on globalThis so dev hot
+// reloads reuse one connection pool instead of opening a new one per reload.
+const globalForDb = globalThis as unknown as { abugidaDb?: Db };
+
+export function getDb(): Db {
+  if (!globalForDb.abugidaDb) {
+    const url = process.env.DATABASE_URL;
+    if (!url) throw new Error("DATABASE_URL is not set");
+    globalForDb.abugidaDb = drizzle(postgres(url, { max: 10 }), { schema });
+  }
+  return globalForDb.abugidaDb;
+}

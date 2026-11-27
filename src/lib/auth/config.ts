@@ -1,29 +1,22 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import type { DrizzleD1Database } from "drizzle-orm/d1";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import * as schema from "../../db/schema";
 
-type AuthEnv = {
-  BETTER_AUTH_SECRET?: string;
-  BETTER_AUTH_URL?: string;
-  // Comma-separated extra origins allowed to call /api/auth, e.g. http://localhost:8787 for `bun run preview`.
-  BETTER_AUTH_TRUSTED_ORIGINS?: string;
-};
-
-// Pure factory with no request or server-only imports, so the Better Auth CLI can load it too.
-export function createAuth(db: DrizzleD1Database<typeof schema>, env: AuthEnv = {}) {
+// Pure factory with no server-only imports, so the Better Auth CLI can load it too.
+export function createAuth(db: PostgresJsDatabase<typeof schema>) {
   return betterAuth({
-    secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.BETTER_AUTH_URL,
-    trustedOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").map((origin) => origin.trim()).filter(Boolean),
-    database: drizzleAdapter(db, { provider: "sqlite", schema }),
+    secret: process.env.BETTER_AUTH_SECRET,
+    baseURL: process.env.BETTER_AUTH_URL,
+    database: drizzleAdapter(db, { provider: "pg", schema }),
     emailAndPassword: { enabled: true },
-    // Workers isolates don't share memory, so keep rate-limit counters in D1. Rate limiting only
-    // covers requests through /api/auth, so auth forms must call that endpoint (authClient), not auth.api.
+    // Rate limiting only covers requests through /api/auth, so auth forms must call that endpoint
+    // (authClient), not auth.api. Counters live in Postgres so they survive restarts and replicas.
     rateLimit: { storage: "database" },
-    // Cloudflare sets cf-connecting-ip and overwrites any client-sent value.
-    advanced: { ipAddress: { ipAddressHeaders: ["cf-connecting-ip"] } },
+    // Railway's edge overwrites X-Real-IP with the client IP (from CF-Connecting-IP when Cloudflare
+    // proxies in front). Re-check after the first deploy that it isn't a proxy address.
+    advanced: { ipAddress: { ipAddressHeaders: ["x-real-ip"] } },
     // nextCookies must stay last: it lets server actions set auth cookies.
     plugins: [nextCookies()],
   });

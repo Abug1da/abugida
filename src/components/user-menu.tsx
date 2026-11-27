@@ -10,7 +10,7 @@ async function readSession() {
     return await getSession();
   } catch (error) {
     unstable_rethrow(error); // let Next.js's own control-flow errors (dynamic bailout, redirect) through
-    // Auth or D1 trouble shouldn't take down every page through the header.
+    // Auth or database trouble shouldn't take down every page through the header.
     console.error("Header session read failed", error);
     return null;
   }

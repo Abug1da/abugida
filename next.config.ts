@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Cache Components (and partialPrefetching, which builds on it) are off: OpenNext warns they are
-  // not fully supported on Cloudflare yet (opennextjs-cloudflare PR #1318). Revisit when it lands.
+  // Cache Components is off for now: /lessons reads the session outside <Suspense> so logged-out
+  // visitors get a real 307. Turning it on means moving that check into proxy.ts first.
   turbopack: {
     rules: {
       "*.css": {
@@ -14,5 +14,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
-import('@opennextjs/cloudflare').then(m => m.initOpenNextCloudflareForDev());

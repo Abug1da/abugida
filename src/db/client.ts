@@ -9,3 +9,6 @@ export type Db = PostgresJsDatabase<typeof schema>;
 export function createDb(url: string, max = 10): Db {
   return drizzle(postgres(url, { max, ssl: "prefer" }), { schema });
 }
+
+/** A transaction handle; read helpers accept either so they can run inside one. */
+export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];

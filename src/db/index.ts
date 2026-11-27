@@ -1,7 +1,7 @@
 import "server-only";
-import { createDb, type Db } from "./client";
+import { createDb, type Db, type Tx } from "./client";
 
-export type { Db };
+export type { Db, Tx };
 
 // Created on first use so `next build` doesn't need DATABASE_URL. Kept on globalThis so dev hot
 // reloads reuse one connection pool instead of opening a new one per reload.

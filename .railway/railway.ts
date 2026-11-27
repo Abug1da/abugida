@@ -12,7 +12,8 @@ export default defineRailway(() => {
     build: "bun run build",
     start: "bun run start",
     // Runs after the build and before traffic moves over; a failure stops the deploy.
-    preDeploy: "bun run db:migrate",
+    // Migrate, then seed (seeding does nothing once any lesson exists, so it's safe every deploy).
+    preDeploy: "bun run db:deploy",
     deploy: { preDeployTimeoutSeconds: 120 },
     healthcheck: "/api/health",
     // Custom domains (theabugida.org, www.theabugida.org) can't be registered from this file; they

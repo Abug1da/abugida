@@ -11,6 +11,13 @@ export function createAuth(db: PostgresJsDatabase<typeof schema>) {
     baseURL: process.env.BETTER_AUTH_URL,
     database: drizzleAdapter(db, { provider: "pg", schema }),
     emailAndPassword: { enabled: true },
+    user: {
+      additionalFields: {
+        // "admin" can use /admin. Never settable from sign-up or the API (input: false); granted
+        // only by `bun run admin:grant <email>`.
+        role: { type: "string", required: false, defaultValue: "learner", input: false },
+      },
+    },
     // Rate limiting only covers requests through /api/auth, so auth forms must call that endpoint
     // (authClient), not auth.api. Counters live in Postgres so they survive restarts and replicas.
     rateLimit: { storage: "database" },

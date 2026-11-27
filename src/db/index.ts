@@ -1,9 +1,7 @@
 import "server-only";
-import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import * as schema from "./schema";
+import { createDb, type Db } from "./client";
 
-export type Db = PostgresJsDatabase<typeof schema>;
+export type { Db };
 
 // Created on first use so `next build` doesn't need DATABASE_URL. Kept on globalThis so dev hot
 // reloads reuse one connection pool instead of opening a new one per reload.
@@ -13,9 +11,7 @@ export function getDb(): Db {
   if (!globalForDb.abugidaDb) {
     const url = process.env.DATABASE_URL;
     if (!url) throw new Error("DATABASE_URL is not set");
-    // "prefer": use TLS when the server offers it (Railway's Postgres image does), plain otherwise
-    // (local Docker Postgres).
-    globalForDb.abugidaDb = drizzle(postgres(url, { max: 10, ssl: "prefer" }), { schema });
+    globalForDb.abugidaDb = createDb(url);
   }
   return globalForDb.abugidaDb;
 }

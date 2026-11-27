@@ -1,0 +1,11 @@
+[
+  {"id": "fidel-01", "title": "Ejectives I", "families": ["ጠ", "ቀ", "ጨ"], "orders": [1, 2, 3, 4, 5, 7]},
+  {"id": "fidel-02", "title": "Ejectives II", "families": ["ጰ", "ጸ", "ፀ"], "orders": [1, 2, 3, 4, 5, 7]},
+  {"id": "fidel-03", "title": "Glottal (ጉሮሮ)", "families": ["ሀ", "ሐ", "ኀ", "አ", "ዐ"], "orders": [1, 2, 3, 4, 5, 7]},
+  {"id": "fidel-04", "title": "Tongue (ልሳን)", "families": ["ለ", "ረ", "ተ", "ነ", "ኘ"], "orders": [1, 2, 3, 4, 5, 7]},
+  {"id": "fidel-05", "title": "Remaining families I", "families": ["መ", "ሠ", "ሰ", "ሸ"], "orders": [1, 2, 3, 4, 5, 7]},
+  {"id": "fidel-06", "title": "Remaining families II", "families": ["በ", "ቸ", "ከ", "ኸ"], "orders": [1, 2, 3, 4, 5, 7]},
+  {"id": "fidel-07", "title": "Remaining families III", "families": ["ወ", "ዘ", "ዠ", "የ"], "orders": [1, 2, 3, 4, 5, 7]},
+  {"id": "fidel-08", "title": "Remaining families IV", "families": ["ደ", "ጀ", "ገ", "ፈ", "ፐ"], "orders": [1, 2, 3, 4, 5, 7]},
+  {"id": "fidel-09", "title": "The 6th order", "families": ["ሀ", "ለ", "ሐ", "መ", "ሠ", "ረ", "ሰ", "ሸ", "ቀ", "በ", "ተ", "ቸ", "ኀ", "ነ", "ኘ", "አ", "ከ", "ኸ", "ወ", "ዐ", "ዘ", "ዠ", "የ", "ደ", "ጀ", "ገ", "ጠ", "ጨ", "ጰ", "ጸ", "ፀ", "ፈ", "ፐ"], "orders": [6]}
+]

@@ -3,7 +3,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { cache } from "react";
 import type { Db, Tx } from "@/db";
 import { getDb } from "@/db";
-import { character, characterProgress, contrastGroup, lesson, lessonCharacter, lessonResult } from "@/db/schema";
+import { character, characterProgress, contrastGroup, fidelFamily, lesson, lessonCharacter, lessonResult } from "@/db/schema";
 import { getSession } from "@/lib/auth/server";
 import type { Character, Content, Lesson } from "./content";
 import { lessonStatuses, type LessonStatus, type Progress } from "./engine";
@@ -12,14 +12,14 @@ import { lessonStatuses, type LessonStatus, type Progress } from "./engine";
    is loaded whole per request and handed to the pure engine. */
 
 export async function loadContent(db: Db = getDb()): Promise<Content> {
-  const [chars, groups, lessons, links] = await Promise.all([
+  const [families, chars, groups, lessons, links] = await Promise.all([
+    db.select().from(fidelFamily),
     db.select().from(character),
     db.select().from(contrastGroup),
     db.select().from(lesson).where(eq(lesson.module, "fidel")).orderBy(asc(lesson.position), asc(lesson.id)),
     db.select().from(lessonCharacter).orderBy(asc(lessonCharacter.position)),
   ]);
-  const familyPosition = new Map<string, number>();
-  for (const c of chars) if (c.order === 1) familyPosition.set(c.id, familyPosition.size);
+  const familyPosition = new Map(families.map((f) => [f.id, f.position]));
   const characters: Record<string, Character> = {};
   for (const c of chars) {
     const contrastFamilies = [...new Set(groups.filter((g) => g.familyIds.includes(c.familyId)).flatMap((g) => g.familyIds))];
@@ -67,7 +67,7 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
 });
 
 export type LessonAccess =
-  | { ok: true; content: Content; lesson: Lesson; status: LessonStatus | "preview"; nextLessonId: string | null }
+  | { ok: true; content: Content; lesson: Lesson; status: LessonStatus | "preview" }
   | { ok: false; reason: "missing" | "locked" };
 
 /** May this viewer open this lesson? Learners: published and unlocked. Admins: anything, as a
@@ -76,12 +76,10 @@ export async function lessonAccess(viewer: Viewer, lessonId: string): Promise<Le
   const content = await loadContent();
   const found = content.lessons.find((l) => l.id === lessonId);
   if (!found) return { ok: false, reason: "missing" };
-  const published = content.lessons.filter((l) => l.status === "published");
-  const nextLessonId = published[published.findIndex((l) => l.id === lessonId) + 1]?.id ?? null;
   const statuses = lessonStatuses(content, await loadCompleted(viewer.id));
   const status = statuses[lessonId];
-  if (status && status !== "locked") return { ok: true, content, lesson: found, status, nextLessonId };
-  if (viewer.isAdmin) return { ok: true, content, lesson: found, status: "preview", nextLessonId };
+  if (status && status !== "locked") return { ok: true, content, lesson: found, status };
+  if (viewer.isAdmin) return { ok: true, content, lesson: found, status: "preview" };
   return { ok: false, reason: found.status === "published" ? "locked" : "missing" };
 }
 

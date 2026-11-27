@@ -12,8 +12,15 @@ export interface QuestionView {
   optionsAreFidel: boolean;
 }
 
-export function toView(q: Question, content: Content): QuestionView {
-  const ch = (id: string) => content.characters[id];
+/** Romanizations for every character a session's questions mention, so a Test keeps showing what
+    it showed at the start even if someone edits a romanization mid-Test. */
+export function romanizationsFor(questions: Question[], content: Content): Record<string, string> {
+  const ids = new Set(questions.flatMap((q) => [q.subjectId, ...q.options]));
+  return Object.fromEntries([...ids].map((id) => [id, content.characters[id].romanization]));
+}
+
+export function toView(q: Question, romanizations: Record<string, string>): QuestionView {
+  const ch = (id: string) => ({ romanization: romanizations[id] });
   if (q.type === "recognize")
     return {
       instruction: "What sound does this make?",

@@ -1,18 +1,21 @@
 "use server";
 
 import { and, eq, isNull, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { characterProgress, lessonResult, testSession } from "@/db/schema";
 import { lessonAccess, getViewer, loadContent, loadProgress } from "@/lib/fidel/data";
+import { nextPublishedLessonId } from "@/lib/fidel/content";
 import { createSession, finishSession, submit, type Session } from "@/lib/fidel/engine";
-import { toView, type AnswerResult, type QuestionView } from "@/lib/fidel/view";
+import { romanizationsFor, toView, type AnswerResult, type QuestionView } from "@/lib/fidel/view";
 
 /* The graded Test. The server builds the questions and keeps the answer key in test_session;
    the browser only ever gets display text and answers by option index. Each answer must be for
    the question at the head of the queue (`step`), and finishing happens once, in a transaction
    guarded by finished_at, so replays and double submits can't change a score. */
 
-type TestState = { session: Session; step: number };
+// romanizations: what the Test showed at the start, kept even if someone edits them mid-Test.
+type TestState = { session: Session; step: number; romanizations: Record<string, string> };
 type Start = { ok: true; sessionId: string; question: QuestionView; remaining: number } | { ok: false; error: string };
 
 export async function startTest(lessonId: string): Promise<Start> {
@@ -24,21 +27,24 @@ export async function startTest(lessonId: string): Promise<Start> {
 
   const session = createSession(access.content, access.lesson, await loadProgress(viewer.id));
   const id = crypto.randomUUID();
-  const state: TestState = { session, step: 0 };
+  const state: TestState = { session, step: 0, romanizations: romanizationsFor(session.queue, access.content) };
   await getDb().transaction(async (tx) => {
-    // One open Test per learner: starting a new one abandons the old.
+    // One open Test per learner: starting a new one abandons the old. The per-user lock makes two
+    // tabs starting at once take turns instead of colliding on the one-open-Test index.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${viewer.id}, 0))`);
     await tx.delete(testSession).where(and(eq(testSession.userId, viewer.id), isNull(testSession.finishedAt)));
     await tx.insert(testSession).values({ id, userId: viewer.id, lessonId, state });
   });
-  return { ok: true, sessionId: id, question: toView(session.queue[0], access.content), remaining: session.queue.length };
+  return { ok: true, sessionId: id, question: toView(session.queue[0], state.romanizations), remaining: session.queue.length };
 }
 
 export async function answerTest(sessionId: string, step: number, optionIndex: number): Promise<AnswerResult | { error: string }> {
   const viewer = await getViewer();
   if (!viewer) return { error: "Log in to take the test." };
   const content = await loadContent();
+  let finishedLessonId: string | null = null;
 
-  return getDb().transaction(async (tx) => {
+  const result = await getDb().transaction(async (tx) => {
     const [row] = await tx
       .select()
       .from(testSession)
@@ -57,9 +63,13 @@ export async function answerTest(sessionId: string, step: number, optionIndex: n
     if (session.queue.length) {
       await tx
         .update(testSession)
-        .set({ state: { session, step: state.step + 1 } satisfies TestState })
+        .set({ state: { ...state, session, step: state.step + 1 } satisfies TestState })
         .where(eq(testSession.id, sessionId));
-      return { correct, correctIndex, next: { question: toView(session.queue[0], content), remaining: session.queue.length } };
+      return {
+        correct,
+        correctIndex,
+        next: { question: toView(session.queue[0], state.romanizations), remaining: session.queue.length },
+      };
     }
 
     // Last answer: score it, record progress and the result, and close the session.
@@ -92,10 +102,18 @@ export async function answerTest(sessionId: string, step: number, optionIndex: n
           lastPlayed: now,
         },
       });
-    await tx.update(testSession).set({ state: { session, step: state.step + 1 }, finishedAt: now }).where(eq(testSession.id, sessionId));
-
-    const published = content.lessons.filter((l) => l.status === "published");
-    const nextLessonId = published[published.findIndex((l) => l.id === row.lessonId) + 1]?.id ?? null;
+    await tx
+      .update(testSession)
+      .set({ state: { ...state, session, step: state.step + 1 }, finishedAt: now })
+      .where(eq(testSession.id, sessionId));
+    const nextLessonId = nextPublishedLessonId(content, row.lessonId);
+    finishedLessonId = row.lessonId;
     return { correct, correctIndex, done: { score: done.score, passed: done.passed, nextLessonId } };
   });
+
+  // The lesson list (statuses) changed. Skipped if the lesson was unpublished mid-Test, since
+  // revalidating also re-renders this lesson's page, which would then be a 404.
+  const stillPublished = content.lessons.some((l) => l.status === "published" && l.id === finishedLessonId);
+  if (finishedLessonId && stillPublished) revalidatePath("/lessons");
+  return result;
 }

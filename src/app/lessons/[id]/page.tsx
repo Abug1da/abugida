@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getViewer, lessonAccess, loadProgress } from "@/lib/fidel/data";
 import { createSession } from "@/lib/fidel/engine";
-import { toView } from "@/lib/fidel/view";
+import { romanizationsFor, toView } from "@/lib/fidel/view";
 import { LessonPlayer, type PracticeQuestion } from "./lesson-player";
 
 export const metadata: Metadata = { title: "Lesson" };
@@ -22,11 +22,16 @@ export default async function Page({ params }: PageProps<"/lessons/[id]">) {
 
   // Practice runs in the browser, so its questions travel with their answers. The graded Test
   // is built on the server when it starts (actions.ts) and never does.
-  const practiceSession = createSession(content, lesson, await loadProgress(viewer.id));
-  const practice: PracticeQuestion[] = practiceSession.queue.map((q) => ({
-    view: toView(q, content),
-    answerIndex: q.options.indexOf(q.answer),
-  }));
+  // A draft that isn't publishable yet (too few characters or sounds) can still be previewed; it
+  // just has no Practice.
+  let practice: PracticeQuestion[] = [];
+  try {
+    const { queue } = createSession(content, lesson, await loadProgress(viewer.id));
+    const romanizations = romanizationsFor(queue, content);
+    practice = queue.map((q) => ({ view: toView(q, romanizations), answerIndex: q.options.indexOf(q.answer) }));
+  } catch (error) {
+    if (access.status !== "preview") throw error;
+  }
   const cards = lesson.characterIds.map((cid) => {
     const c = content.characters[cid];
     return { fidel: c.id, romanization: c.romanization, audioUrl: c.audioUrl };
@@ -48,7 +53,6 @@ export default async function Page({ params }: PageProps<"/lessons/[id]">) {
         practice={practice}
         preview={access.status === "preview"}
         alreadyComplete={access.status === "complete"}
-        nextLessonId={access.nextLessonId}
       />
     </main>
   );

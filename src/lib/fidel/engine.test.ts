@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { OPTION_COUNT, validateCourse, type Content } from './content.ts'
+import { nextPublishedLessonId, OPTION_COUNT, validateCourse, type Content } from './content.ts'
 import { createSession, finishSession, lessonStatuses, submit, type Session } from './engine.ts'
 import { seedContent } from './seed/index.ts'
 
@@ -123,6 +123,14 @@ test('flow: miss re-asked once; score counts only the lesson’s own characters;
 
   const failed = finishSession(answerAll(createSession(content, l1, {}, seeded(2)), () => false), {})
   assert.equal(failed.passed, false)
+})
+
+test('nextPublishedLessonId: skips drafts, null for the last lesson or an unpublished one', () => {
+  const c = clone(content)
+  c.lessons[1].status = 'draft'
+  assert.equal(nextPublishedLessonId(c, c.lessons[0].id), c.lessons[2].id)
+  assert.equal(nextPublishedLessonId(c, c.lessons[1].id), null) // not lesson 1 again
+  assert.equal(nextPublishedLessonId(c, c.lessons.at(-1)!.id), null)
 })
 
 test('flow: grading uses the lesson as it was when the session started', () => {

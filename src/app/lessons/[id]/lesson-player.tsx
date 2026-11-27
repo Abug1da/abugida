@@ -23,7 +23,6 @@ export function LessonPlayer(props: {
   practice: PracticeQuestion[];
   preview: boolean;
   alreadyComplete: boolean;
-  nextLessonId: string | null;
 }) {
   const [step, setStep] = useState<Step>("learn");
   const [run, setRun] = useState(0); // remounts a quiz to start it again
@@ -47,13 +46,21 @@ export function LessonPlayer(props: {
         </div>
       )}
 
-      {step === "practice" && (
+      {step === "practice" && props.practice.length === 0 && (
+        <p className="text-muted-foreground">This draft can&apos;t make practice questions yet: it needs more characters, or more distinct sounds.</p>
+      )}
+
+      {step === "practice" && props.practice.length > 0 && (
         <Quiz
           key={`practice-${run}`}
           start={() => Promise.resolve(practiceRun(props.practice))}
           finishedLabel="Practice again"
           onRestart={() => setRun((r) => r + 1)}
-          extra={<Button variant="outline" onClick={() => setStep("test")}>Take the test</Button>}
+          extra={() => (
+            <Button variant="outline" onClick={() => setStep("test")}>
+              Take the test
+            </Button>
+          )}
         />
       )}
 
@@ -72,9 +79,10 @@ export function LessonPlayer(props: {
             }
             finishedLabel="Take the test again"
             onRestart={() => setRun((r) => r + 1)}
-            extra={
-              props.nextLessonId ? (
-                <Link href={`/lessons/${props.nextLessonId}`} className={buttonVariants({ variant: "outline" })}>
+            extra={(done) =>
+              // "Next lesson" only once it's actually unlocked; the server reports the current next lesson.
+              (done.passed || props.alreadyComplete) && done.nextLessonId ? (
+                <Link href={`/lessons/${done.nextLessonId}`} className={buttonVariants({ variant: "outline" })}>
                   Next lesson
                 </Link>
               ) : (

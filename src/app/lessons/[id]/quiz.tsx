@@ -16,11 +16,22 @@ type State =
   | { kind: "loading" }
   | { kind: "error"; message: string }
   | { kind: "asking"; run: QuizStart; question: QuestionView; remaining: number; picked?: number; result?: AnswerResult; busy?: boolean }
-  | { kind: "done"; score: number; passed: boolean; graded: boolean };
+  | { kind: "done"; score: number; passed: boolean; graded: boolean; nextLessonId: string | null };
+
+export type QuizDone = { passed: boolean; nextLessonId: string | null };
 
 /** Shared by Practice (answers checked in the browser) and the Test (answers checked by the server). */
-export function Quiz(props: { start: () => Promise<QuizStart>; intro?: ReactNode; extra?: ReactNode; finishedLabel: string; onRestart: () => void }) {
+export function Quiz(props: {
+  start: () => Promise<QuizStart>;
+  intro?: ReactNode;
+  extra?: (done: QuizDone) => ReactNode;
+  finishedLabel: string;
+  onRestart: () => void;
+}) {
   const [state, setState] = useState<State>({ kind: "loading" });
+  // Set synchronously on the first click, before React re-renders, so a double click can't send
+  // two answers for one question. Cleared when moving to the next question.
+  const answering = useRef(false);
   // Start exactly once per mount: for the Test, starting creates a server session, so a parent
   // re-render must never start another. (Restart remounts the quiz with a new key.)
   const start = useRef(props.start);
@@ -52,18 +63,23 @@ export function Quiz(props: { start: () => Promise<QuizStart>; intro?: ReactNode
       <div className="flex flex-col items-start gap-3">
         <p className="text-2xl font-semibold">{Math.round(state.score * 100)}% on the first try</p>
         {state.graded && (
-          <p className="text-muted-foreground">{state.passed ? "Passed. The next lesson is unlocked." : "Not quite 70% yet. Practice a little and try again."}</p>
+          <p className="text-muted-foreground">
+            {state.passed
+              ? `Passed.${state.nextLessonId ? " The next lesson is unlocked." : ""}`
+              : "Not quite 70% yet. Practice a little and try again."}
+          </p>
         )}
         <div className="flex flex-wrap gap-2">
           <Button onClick={props.onRestart}>{props.finishedLabel}</Button>
-          {props.extra}
+          {props.extra?.({ passed: state.passed, nextLessonId: state.nextLessonId })}
         </div>
       </div>
     );
 
   const s = state;
   const choose = async (i: number) => {
-    if (s.result || s.busy) return;
+    if (answering.current || s.result) return;
+    answering.current = true;
     setState({ ...s, picked: i, busy: true });
     try {
       const result = await s.run.answer(i);
@@ -74,7 +90,8 @@ export function Quiz(props: { start: () => Promise<QuizStart>; intro?: ReactNode
   };
   const advance = () => {
     const r = s.result!;
-    if (r.done) setState({ kind: "done", score: r.done.score, passed: r.done.passed, graded: !!s.run.graded });
+    answering.current = false;
+    if (r.done) setState({ kind: "done", ...r.done, graded: !!s.run.graded });
     else if (r.next) setState({ kind: "asking", run: s.run, question: r.next.question, remaining: r.next.remaining });
   };
 
@@ -96,7 +113,7 @@ export function Quiz(props: { start: () => Promise<QuizStart>; intro?: ReactNode
             <Button
               key={i}
               variant="outline"
-              disabled={!!s.busy}
+              disabled={!!s.busy || !!s.result}
               onClick={() => choose(i)}
               lang={s.question.optionsAreFidel ? "am" : undefined}
               className={cn(

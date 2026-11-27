@@ -63,6 +63,13 @@ export const OPTION_COUNT = 4
 export const earlierPublished = (content: Content, lesson: Lesson) =>
   content.lessons.filter((l) => l.status === 'published' && l.position <= lesson.position)
 
+/** The published lesson after `lessonId`, or null when it's the last one or isn't published. */
+export function nextPublishedLessonId(content: Content, lessonId: string): string | null {
+  const published = content.lessons.filter((l) => l.status === 'published')
+  const i = published.findIndex((l) => l.id === lessonId)
+  return i >= 0 ? (published[i + 1]?.id ?? null) : null
+}
+
 /** Problems that would break learners, as readable sentences for the admin. Empty means fine.
     Checks the whole published course, because a change to one lesson or one romanization can
     break a lesson nobody touched. */

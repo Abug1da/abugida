@@ -45,9 +45,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm [--card-spacing:--spacing(6)]">
       <CardHeader>
-        <CardTitle>{signup ? "Create your account" : "Welcome back"}</CardTitle>
+        <CardTitle className="text-xl font-semibold">{signup ? "Create your account" : "Welcome back"}</CardTitle>
         <CardDescription>
           {signup ? "Abugida is free. Your progress is saved to your account." : "Log in to pick up where you left off."}
         </CardDescription>
@@ -57,12 +57,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           {signup && (
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" autoComplete="name" required />
+              <Input id="name" name="name" autoComplete="name" required className="h-10" />
             </div>
           )}
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" autoComplete="email" required />
+            <Input id="email" name="email" type="email" autoComplete="email" required className="h-10" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
@@ -73,6 +73,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
               autoComplete={signup ? "new-password" : "current-password"}
               minLength={8}
               required
+              className="h-10"
             />
           </div>
           {error && (
@@ -80,12 +81,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
               {error}
             </p>
           )}
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" disabled={pending} className="h-10 text-base">
             {pending ? "One moment…" : signup ? "Sign up" : "Log in"}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             {signup ? "Already have an account? " : "New here? "}
-            <Link href={signup ? "/login" : "/signup"} className="underline underline-offset-4">
+            <Link href={signup ? "/login" : "/signup"} className="font-medium text-primary underline underline-offset-4">
               {signup ? "Log in" : "Sign up"}
             </Link>
           </p>

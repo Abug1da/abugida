@@ -8,7 +8,7 @@ export default defineRailway(() => {
   const db = postgres("postgres");
 
   const web = service("web", {
-    source: github("Abug1da/abug1da.github.io", { branch: "main" }),
+    source: github("Abug1da/abugida", { branch: "main" }),
     build: "bun run build",
     start: "bun run start",
     // Runs after the build and before traffic moves over; a failure stops the deploy.

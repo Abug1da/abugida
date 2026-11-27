@@ -8,8 +8,7 @@ export default defineRailway(() => {
   const db = postgres("postgres");
 
   const web = service("web", {
-    // Switch the branch to "main" once `rebuild` is merged.
-    source: github("Abug1da/abug1da.github.io", { branch: "rebuild" }),
+    source: github("Abug1da/abug1da.github.io", { branch: "main" }),
     build: "bun run build",
     start: "bun run start",
     // Runs after the build and before traffic moves over; a failure stops the deploy.

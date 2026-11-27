@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
         destination: "https://theabugida.org/:path*",
         permanent: true,
       },
+      {
+        // The Railway-provided URL would serve pages whose logins fail the origin check.
+        // (Railway's healthcheck uses its own host, so it isn't redirected.)
+        source: "/:path*",
+        has: [{ type: "host", value: "(?<sub>.+)\\.up\\.railway\\.app" }],
+        destination: "https://theabugida.org/:path*",
+        permanent: false,
+      },
     ];
   },
   turbopack: {

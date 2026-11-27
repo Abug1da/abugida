@@ -43,3 +43,15 @@ The service and database are described in `.railway/railway.ts` (Railway infrast
    - the build log lists every page as dynamic (`ƒ`);
    - sign-in sets a `__Secure-` cookie;
    - `railway config plan` shows no drift.
+
+## Backups
+
+The `backup` service on Railway runs `backup/backup.sh` every night at 09:00 UTC: `pg_dump` of the production database, uploaded to the private R2 bucket `abugida-backups` under `postgres/`. The bucket locks each dump for 30 days and deletes it after 31. healthchecks.io emails support@theabugida.org if a night is missed. Dumps contain emails and password hashes, so the bucket must never be made public.
+
+To restore (practice this on a local database first):
+
+1. Download the dump you want from the R2 dashboard (bucket `abugida-backups`, folder `postgres/`).
+2. Into local Docker Postgres: `docker compose exec -T postgres psql -U abugida -c "create database restore_test"`, then `docker compose exec -T postgres pg_restore -U abugida --no-owner -d restore_test < abugida-….dump`.
+3. Check it, then restore into production the same way with the production `DATABASE_URL` (Railway's dashboard can open a temporary public connection to the `postgres` service), or copy back only the rows you need.
+
+Run a manual backup before a risky migration: `railway redeploy --service backup` runs the job once.

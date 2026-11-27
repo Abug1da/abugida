@@ -26,5 +26,22 @@ export default defineRailway(() => {
     },
   });
 
-  return project("abugida", { resources: [web, db] });
+  // Nightly database backup to the private R2 bucket abugida-backups (backup/backup.sh).
+  // 09:00 UTC is 3 AM US Central. healthchecks.io emails if a night is missed.
+  const backup = service("backup", {
+    source: github("Abug1da/abugida", { branch: "main" }),
+    build: { builder: "DOCKERFILE", dockerfilePath: "backup/Dockerfile", watchPatterns: ["backup/**"] },
+    deploy: { cronSchedule: "0 9 * * *", restartPolicyType: "NEVER" },
+    env: {
+      DATABASE_URL: db.env.DATABASE_URL,
+      R2_BUCKET: "abugida-backups",
+      // Set once with `railway variables --service backup`; preserve() keeps them on apply.
+      R2_ENDPOINT: preserve(),
+      R2_ACCESS_KEY_ID: preserve(),
+      R2_SECRET_ACCESS_KEY: preserve(),
+      HC_PING_URL: preserve(),
+    },
+  });
+
+  return project("abugida", { resources: [web, db, backup] });
 });

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { type FormEvent, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,18 +16,27 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
 
-  function submit(formData: FormData) {
+  // onSubmit rather than <form action>: React resets the form after an action, which would wipe
+  // what the learner typed whenever login fails.
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
 
     startTransition(async () => {
       setError(undefined);
-      const { error } = signup
-        ? await authClient.signUp.email({ name, email, password })
-        : await authClient.signIn.email({ email, password });
-      if (error) {
-        setError(error.message ?? "Something went wrong. Try again.");
+      try {
+        const { error } = signup
+          ? await authClient.signUp.email({ name, email, password })
+          : await authClient.signIn.email({ email, password });
+        if (error) {
+          setError(error.message ?? "Something went wrong. Try again.");
+          return;
+        }
+      } catch {
+        setError("Couldn't reach the server. Check your connection and try again.");
         return;
       }
       router.push("/lessons");
@@ -44,7 +53,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={submit} className="flex flex-col gap-4">
+        <form onSubmit={submit} className="flex flex-col gap-4">
           {signup && (
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>

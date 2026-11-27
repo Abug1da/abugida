@@ -4,13 +4,19 @@ import { nextCookies } from "better-auth/next-js";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../../db/schema";
 
-type AuthEnv = { BETTER_AUTH_SECRET?: string; BETTER_AUTH_URL?: string };
+type AuthEnv = {
+  BETTER_AUTH_SECRET?: string;
+  BETTER_AUTH_URL?: string;
+  // Comma-separated extra origins allowed to call /api/auth, e.g. http://localhost:8787 for `bun run preview`.
+  BETTER_AUTH_TRUSTED_ORIGINS?: string;
+};
 
 // Pure factory with no request or server-only imports, so the Better Auth CLI can load it too.
 export function createAuth(db: DrizzleD1Database<typeof schema>, env: AuthEnv = {}) {
   return betterAuth({
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
+    trustedOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").map((origin) => origin.trim()).filter(Boolean),
     database: drizzleAdapter(db, { provider: "sqlite", schema }),
     emailAndPassword: { enabled: true },
     // Workers isolates don't share memory, so keep rate-limit counters in D1. Rate limiting only

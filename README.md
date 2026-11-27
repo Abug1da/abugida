@@ -32,6 +32,8 @@ bun run dev                      # http://localhost:3000
 1. `bunx wrangler login`
 2. `bunx wrangler d1 create abugida` and paste the id into `wrangler.jsonc` (it is a placeholder now)
 3. `bunx wrangler secret put BETTER_AUTH_SECRET` and set `BETTER_AUTH_URL` to the production URL
+   (leave `BETTER_AUTH_TRUSTED_ORIGINS` unset in production). Redirect `www` to the apex domain at Cloudflare,
+   in front of the Worker, or sign-in from `www` fails Better Auth's origin check.
 4. `bun run db:migrate:remote`, then `bun run deploy`
 
 Password hashing needs more CPU than the Workers free plan allows per request, so plan on the $5/month Workers Paid plan.

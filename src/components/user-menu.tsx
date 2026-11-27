@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { getSession } from "@/lib/auth/server";
 import { SessionRefresher } from "./session-refresher";
@@ -8,6 +9,7 @@ async function readSession() {
   try {
     return await getSession();
   } catch (error) {
+    unstable_rethrow(error); // let Next.js's own control-flow errors (dynamic bailout, redirect) through
     // Auth or D1 trouble shouldn't take down every page through the header.
     console.error("Header session read failed", error);
     return null;

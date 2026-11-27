@@ -13,7 +13,9 @@ export function getDb(): Db {
   if (!globalForDb.abugidaDb) {
     const url = process.env.DATABASE_URL;
     if (!url) throw new Error("DATABASE_URL is not set");
-    globalForDb.abugidaDb = drizzle(postgres(url, { max: 10 }), { schema });
+    // "prefer": use TLS when the server offers it (Railway's Postgres image does), plain otherwise
+    // (local Docker Postgres).
+    globalForDb.abugidaDb = drizzle(postgres(url, { max: 10, ssl: "prefer" }), { schema });
   }
   return globalForDb.abugidaDb;
 }

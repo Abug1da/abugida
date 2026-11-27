@@ -30,11 +30,16 @@ bun run dev                     # http://localhost:3000
 
 ## Deploying to Railway
 
-The service and database are described in `.railway/railway.ts` (Railway infrastructure as code). It is not applied on push.
+The service and database are described in `.railway/railway.ts` (Railway infrastructure as code). It is not applied on push, and settings changed only in the dashboard show up as drift, so change that file instead.
 
-1. Install the Railway CLI, then `railway login` and create a project in the dashboard.
-2. Connect the GitHub repo to the `web` service in the dashboard, and set `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) and `BETTER_AUTH_URL` (the production URL, e.g. `https://theabugida.org`).
-3. `railway link`, then `railway config plan` and `railway config apply` to create the Postgres database and apply the service settings.
-4. Each deploy runs `bun run db:migrate` before switching traffic, and Railway waits for `/api/health` (which checks the database) to answer.
-5. Point the domain at Railway. Redirect `www` to the apex domain, or sign-in from `www` fails Better Auth's origin check.
-6. After the first deploy, check that sessions record real client IPs (the `ip_address` column of `session`), not a proxy address. Rate limiting keys on `X-Real-IP`.
+1. Push the `rebuild` branch (the file deploys it; switch to `main` after merging).
+2. Install the Railway CLI (5.42.1 or newer), `railway login`, create an empty project (`railway init`), and `railway link` from this folder.
+3. `railway config plan`, then `railway config apply`. This creates the Postgres database and the `web` service connected to the repo.
+4. Set `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) and `BETTER_AUTH_URL` (the production URL) on `web` with `railway variables` or the dashboard, then redeploy.
+5. Each deploy runs `bun run db:migrate` before switching traffic (stopped after 120 seconds), and Railway waits for `/api/health`, which checks the database.
+6. To move theabugida.org from Firebase Hosting: uncomment `domains` in `.railway/railway.ts`, apply, point DNS at Railway, and redirect `www` to the apex domain (sign-in from `www` fails Better Auth's origin check). Keep Cloudflare DNS-only (grey cloud): rate limiting trusts `X-Real-IP`, which Railway's edge overwrites.
+7. After the first deploy, check:
+   - `select ip_address from session order by created_at desc limit 5` shows real client IPs, not empty or a proxy address. If they're missing, every login shares one rate-limit bucket.
+   - the build log lists every page as dynamic (`ƒ`);
+   - sign-in sets a `__Secure-` cookie;
+   - `railway config plan` shows no drift.

@@ -32,7 +32,7 @@ bun run dev                     # http://localhost:3000
 
 The service and database are described in `.railway/railway.ts` (Railway infrastructure as code). It is not applied on push, and settings changed only in the dashboard show up as drift, so change that file instead.
 
-1. Railway deploys the `main` branch. Pushes deploy automatically only once the Railway GitHub app has access to the repo; otherwise run `railway redeploy --service web --from-source`.
+1. Railway deploys the `main` branch: every push to `main` deploys automatically (the Railway GitHub app is installed on the Abug1da org). To redeploy by hand: `railway redeploy --service web --from-source`.
 2. Install the Railway CLI (5.42.1 or newer), `railway login`, create an empty project (`railway init`), and `railway link` from this folder.
 3. `railway config plan`, then `railway config apply`. This creates the Postgres database and the `web` service connected to the repo.
 4. Set `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) and `BETTER_AUTH_URL` (the production URL) on `web` with `railway variables` or the dashboard, then redeploy.

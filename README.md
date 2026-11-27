@@ -37,7 +37,7 @@ The service and database are described in `.railway/railway.ts` (Railway infrast
 3. `railway config plan`, then `railway config apply`. This creates the Postgres database and the `web` service connected to the repo.
 4. Set `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) and `BETTER_AUTH_URL` (the production URL) on `web` with `railway variables` or the dashboard, then redeploy.
 5. Each deploy runs `bun run db:migrate` before switching traffic (stopped after 120 seconds), and Railway waits for `/api/health`, which checks the database.
-6. To move theabugida.org from Firebase Hosting: uncomment `domains` in `.railway/railway.ts`, apply, point DNS at Railway, and redirect `www` to the apex domain (sign-in from `www` fails Better Auth's origin check). Keep Cloudflare DNS-only (grey cloud): rate limiting trusts `X-Real-IP`, which Railway's edge overwrites.
+6. Domains: theabugida.org and www.theabugida.org are custom domains on `web` (added with `railway domain`, since `railway.ts` can't register them). Cloudflare DNS has CNAMEs to Railway plus `_railway-verify` TXT records, all DNS-only (grey cloud): rate limiting trusts `X-Real-IP`, which Railway's edge overwrites. `www` redirects to the apex in `next.config.ts`, because Better Auth only accepts the `BETTER_AUTH_URL` origin. Leave the Google Workspace MX/SPF records alone.
 7. After the first deploy, check:
    - `select ip_address from session order by created_at desc limit 5` shows real client IPs, not empty or a proxy address. If they're missing, every login shares one rate-limit bucket.
    - the build log lists every page as dynamic (`ƒ`);

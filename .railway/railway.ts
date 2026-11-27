@@ -9,15 +9,15 @@ export default defineRailway(() => {
 
   const web = service("web", {
     // Switch the branch to "main" once `rebuild` is merged.
-    source: github("Abug1da/abugida", { branch: "rebuild" }),
+    source: github("Abug1da/abug1da.github.io", { branch: "rebuild" }),
     build: "bun run build",
     start: "bun run start",
     // Runs after the build and before traffic moves over; a failure stops the deploy.
     preDeploy: "bun run db:migrate",
     deploy: { preDeployTimeoutSeconds: 120 },
     healthcheck: "/api/health",
-    // Uncomment when theabugida.org moves from Firebase Hosting to Railway.
-    // domains: ["theabugida.org"],
+    // Custom domains (theabugida.org, www.theabugida.org) can't be registered from this file; they
+    // were added with `railway domain <name> --service web`. www redirects to the apex in next.config.ts.
     env: {
       DATABASE_URL: db.env.DATABASE_URL,
       // Set these once with `railway variables` or the dashboard; preserve() keeps them on apply.
